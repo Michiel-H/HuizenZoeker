@@ -11,8 +11,8 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.config import DB_PATH, TARGET_NEIGHBORHOODS
-from src.storage.database import get_db, get_listings, init_db
+from src.config import TARGET_NEIGHBORHOODS
+from src.storage.backend import get_connection, get_listings, init, get_backend_name, USE_SUPABASE
 
 st.set_page_config(
     page_title="Amsterdam Rental Monitor",
@@ -25,11 +25,8 @@ def main():
     st.title("🏠 Amsterdam Rental Monitor")
     st.caption("Daily overview of rental listings in Amsterdam")
 
-    init_db()
-
-    if not DB_PATH.exists():
-        st.warning("No database found. Run the collection pipeline first.")
-        return
+    init()
+    st.sidebar.caption(f"Backend: {get_backend_name()}")
 
     # Sidebar filters
     st.sidebar.header("🔍 Filters")
@@ -65,7 +62,7 @@ def main():
     )
 
     # Query listings
-    with get_db() as conn:
+    with get_connection() as conn:
         filters = {}
         if selected_hood != "All":
             filters["neighborhood"] = selected_hood
@@ -178,9 +175,16 @@ def _render_listing(listing):
 def _get_sources() -> list[str]:
     """Get distinct sources from the database."""
     try:
-        with get_db() as conn:
-            rows = conn.execute("SELECT DISTINCT source FROM listings ORDER BY source").fetchall()
-            return [r["source"] for r in rows]
+        if USE_SUPABASE:
+            from src.storage.supabase_db import get_sources_pg
+            from src.storage.backend import get_connection
+            with get_connection() as conn:
+                return get_sources_pg(conn)
+        else:
+            from src.storage.database import get_db
+            with get_db() as conn:
+                rows = conn.execute("SELECT DISTINCT source FROM listings ORDER BY source").fetchall()
+                return [r["source"] for r in rows]
     except Exception:
         return []
 

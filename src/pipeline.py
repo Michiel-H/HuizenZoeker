@@ -10,10 +10,10 @@ from src.config import MAX_PRICE_EUR
 from src.dedupe.engine import compute_dedupe_score, generate_dedupe_id
 from src.models import NormalizedListing, RawListing
 from src.normalizer.normalize import normalize_listing
-from src.storage.database import (
-    get_db,
+from src.storage.backend import (
+    get_connection,
     get_listings,
-    init_db,
+    init,
     log_run,
     mark_missing,
     upsert_listing,
@@ -27,7 +27,7 @@ def run_pipeline() -> dict:
 
     Returns a summary dict with counts.
     """
-    init_db()
+    init()
     summary = {
         "total_fetched": 0,
         "total_kept": 0,
@@ -84,7 +84,7 @@ def run_pipeline() -> dict:
             changed_count = 0
             seen_source_ids: set[str] = set()
 
-            with get_db() as conn:
+            with get_connection() as conn:
                 # Get existing listings for cross-source dedup
                 existing_listings = get_listings(conn, status="ACTIVE")
                 existing_normalized = [
@@ -210,7 +210,7 @@ def run_pipeline() -> dict:
 
             # Log the failed run
             try:
-                with get_db() as conn:
+                with get_connection() as conn:
                     log_run(
                         conn=conn,
                         source=source_name,

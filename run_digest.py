@@ -18,16 +18,16 @@ logger = logging.getLogger(__name__)
 
 def main():
     from src.config import TIMEZONE
-    from src.storage.database import (
+    from src.storage.backend import (
+        get_connection,
         get_daily_changes,
-        get_db,
-        init_db,
+        init,
         log_email_sent,
         was_email_sent_today,
     )
     from src.notifier.email_sender import send_daily_digest
 
-    init_db()
+    init()
 
     tz = ZoneInfo(TIMEZONE)
     now_local = datetime.now(tz)
@@ -42,7 +42,7 @@ def main():
         logger.info(f"Not email time (hour={current_hour}). Skipping digest.")
         return
 
-    with get_db() as conn:
+    with get_connection() as conn:
         if was_email_sent_today(conn, today_str):
             logger.info(f"Email already sent today ({today_str}). Skipping.")
             return

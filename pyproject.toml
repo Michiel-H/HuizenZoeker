@@ -12,6 +12,7 @@ dependencies = [
     "python-dotenv>=1.0",
     "tenacity>=8.2",
     "rapidfuzz>=3.5",
+    "psycopg2-binary>=2.9",
 ]
 
 [project.optional-dependencies]
