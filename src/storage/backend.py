@@ -15,7 +15,7 @@ from typing import Optional
 from src.models import StoredListing
 
 # Detect backend
-SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL", "")
+SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL", "").strip()
 USE_SUPABASE = bool(SUPABASE_DB_URL)
 
 
