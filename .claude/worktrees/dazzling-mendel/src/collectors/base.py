@@ -6,8 +6,7 @@ import logging
 import time
 from abc import ABC, abstractmethod
 
-import requests as std_requests
-from curl_cffi import requests
+import httpx
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -29,19 +28,19 @@ class BaseCollector(ABC):
 
     def __init__(self):
         self._last_request_time: float = 0
-        self._client: requests.Session | None = None
+        self._client: httpx.Client | None = None
 
     @property
-    def client(self) -> requests.Session:
+    def client(self) -> httpx.Client:
         if self._client is None:
-            self._client = requests.Session(
-                impersonate="chrome",
+            self._client = httpx.Client(
                 timeout=REQUEST_TIMEOUT_SEC,
                 headers={
                     "User-Agent": USER_AGENT,
                     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                     "Accept-Language": "nl-NL,nl;q=0.9,en;q=0.8",
                 },
+                follow_redirects=True,
             )
         return self._client
 
@@ -55,7 +54,7 @@ class BaseCollector(ABC):
     @retry(
         stop=stop_after_attempt(MAX_RETRIES),
         wait=wait_exponential(multiplier=1, min=2, max=30),
-        retry=retry_if_exception_type((requests.RequestsError, std_requests.exceptions.RequestException)),
+        retry=retry_if_exception_type((httpx.HTTPError, httpx.TimeoutException)),
     )
     def fetch_page(self, url: str) -> str:
         """Fetch a page with rate limiting and retries."""
@@ -68,7 +67,7 @@ class BaseCollector(ABC):
     @retry(
         stop=stop_after_attempt(MAX_RETRIES),
         wait=wait_exponential(multiplier=1, min=2, max=30),
-        retry=retry_if_exception_type((requests.RequestsError, std_requests.exceptions.RequestException)),
+        retry=retry_if_exception_type((httpx.HTTPError, httpx.TimeoutException)),
     )
     def fetch_json(self, url: str) -> dict:
         """Fetch JSON data with rate limiting and retries."""
