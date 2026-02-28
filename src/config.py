@@ -36,7 +36,7 @@ USER_AGENT = (
 )
 
 # Filtering
-MAX_PRICE_EUR = 2200
+MAX_PRICE_EUR = 2500
 
 # Target neighborhoods with synonyms/variants for matching
 TARGET_NEIGHBORHOODS: dict[str, list[str]] = {

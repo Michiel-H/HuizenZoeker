@@ -22,7 +22,7 @@ class VestedaCollector(BaseCollector):
         html_url = f"{self.BASE_URL}/en/apartments/amsterdam/"
         try:
             try:
-                data = self.fetch_json(f"{self.BASE_URL}/api/properties?city=amsterdam&maxRent=2200")
+                data = self.fetch_json(f"{self.BASE_URL}/api/properties?city=amsterdam&maxRent=2500")
                 items = data if isinstance(data, list) else data.get("results", [])
                 for item in items:
                     listing = self._parse_api_item(item)

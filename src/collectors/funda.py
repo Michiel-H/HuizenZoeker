@@ -23,7 +23,7 @@ class FundaCollector(BaseCollector):
         max_pages = 10
 
         while page <= max_pages:
-            url = f"{self.BASE_URL}/huur/amsterdam/0-2200/"
+            url = f"{self.BASE_URL}/huur/amsterdam/0-2500/"
             if page > 1:
                 url += f"p{page}/"
             try:

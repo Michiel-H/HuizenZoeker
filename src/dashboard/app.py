@@ -38,7 +38,7 @@ def main():
         "Price range (€/month)",
         min_value=0,
         max_value=3000,
-        value=(0, 2200),
+        value=(0, 2500),
         step=50,
     )
 
